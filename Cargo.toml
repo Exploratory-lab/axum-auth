@@ -1,0 +1,12 @@
+[package]
+name = "axum-auth"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.7.9"
+serde = { version = "1.0.216", features = ["derive"] }
+sqlx = {version = "0.8.2", features = [ "runtime-tokio", "tls-rustls-ring" ] }
+tokio = {version = "1.42.0", features = ['full']}
