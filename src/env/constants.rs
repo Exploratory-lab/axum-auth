@@ -1,7 +1,7 @@
 //! Constants for application environment setup.
 
 // Local imports
-use super::EnvVar;
+use super::{EnvVar, EnvVarType};
 
 // Environment file path to load
 pub const FILE_PATH: &str = ".env";
@@ -13,18 +13,22 @@ pub const PREFIX: &str = "AXA_";
 pub const VARS: [EnvVar; 4] = [
     EnvVar {
         name: "DB_NAME",
-        validator: None,
+        val_type: EnvVarType::String,
+        val_example: "test_db",
     },
     EnvVar {
         name: "DB_HOST",
-        validator: None,
+        val_type: EnvVarType::String,
+        val_example: "localhost",
     },
     EnvVar {
         name: "DB_PORT",
-        validator: None,
+        val_type: EnvVarType::U16,
+        val_example: "5432",
     },
     EnvVar {
         name: "DB_USER",
-        validator: None,
+        val_type: EnvVarType::String,
+        val_example: "test_user",
     },
 ];
