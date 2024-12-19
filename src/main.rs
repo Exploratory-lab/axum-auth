@@ -1,4 +1,4 @@
-//! TODO: Add a description
+//! todo: Add a description
 
 // std library imports
 use std::process;

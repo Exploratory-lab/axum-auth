@@ -9,7 +9,7 @@ use env::constants::PREFIX as ENV_PREFIX;
 use env::constants::VARS as ENV_VARS;
 use err::AppError;
 
-// TODO: Create tests for this function
+// todo: Create tests for this function
 /// Runs the application.
 ///
 /// Function loads environment variables from file
@@ -30,8 +30,8 @@ use err::AppError;
 pub async fn run_app() -> Result<(), AppError> {
     env::load(ENV_FILE_PATH, ENV_PREFIX, &ENV_VARS)?;
 
-    // TODO: build pool connection
-    // TODO: start http server
+    // todo: build pool connection
+    // todo: start http server
 
     Ok(())
 }

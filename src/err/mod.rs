@@ -31,7 +31,7 @@ pub struct AppError {
 
 /// Implementation block for `AppError` struct.
 impl AppError {
-    // TODO: Create tests for this function
+    // todo: Create tests for this function
     /// Creates a new `AppError` instance.
     ///
     /// Function creates a new `AppError` instance with
@@ -73,7 +73,7 @@ impl AppError {
 
 /// Implementation of `PartialEq` trait for `AppError` struct.
 impl PartialEq for AppError {
-    // TODO: Create tests for this function
+    // todo: Create tests for this function
     /// Compares two `AppError` instances.
     /// Function compares two `AppError` instances by
     /// comparing their kind, message and source.
@@ -104,7 +104,7 @@ impl PartialEq for AppError {
 
 /// Implementation of `Display` trait for `AppError` struct.
 impl fmt::Display for AppError {
-    // TODO: Create tests for this function
+    // todo: Create tests for this function
     /// Formats `AppError` struct for display.
     ///
     /// Function formats `AppError` struct for display
