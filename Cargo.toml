@@ -13,4 +13,4 @@ sqlx = {version = "0.8.2", features = [ "runtime-tokio", "tls-rustls-ring", "pos
 tokio = {version = "1.42.0", features = ['full']}
 
 [dev-dependencies]
-tempfile = "3.6"
+tempfile = "3.14.0"

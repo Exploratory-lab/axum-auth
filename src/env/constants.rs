@@ -31,4 +31,9 @@ pub const VARS: [EnvVar; 4] = [
         val_type: EnvVarType::String,
         val_example: "test_user",
     },
+    // EnvVar {
+    //     name: "DB_HOLA",
+    //     val_type: EnvVarType::String,
+    //     val_example: "test_user",
+    // },
 ];

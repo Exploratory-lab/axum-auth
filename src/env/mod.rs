@@ -8,13 +8,16 @@
 
 // References to submodules
 pub mod constants;
+mod validator;
 
 // std library imports
 use std::{error, fmt};
 
 // Local imports
 use crate::err::{AppError, ErrorKind};
+use validator::validate_all;
 
+// * DONE
 /// Environment variable struct.
 ///
 /// Struct represents an environment variable with
@@ -34,12 +37,14 @@ use crate::err::{AppError, ErrorKind};
 /// - `name`: Name of the environment variable.
 /// - `val_type`: Type of the environment variable.
 /// - `val_example`: Example value for the environment variable.
+#[derive(Debug, Clone, Copy)]
 pub struct EnvVar<'a> {
     pub name: &'a str,
     pub val_type: EnvVarType,
     pub val_example: &'a str,
 }
 
+// * DONE
 /// Implements "Display" trait for "EnvVar" struct.
 ///
 /// Trait formats "EnvVar" struct for display.
@@ -66,6 +71,7 @@ impl fmt::Display for EnvVar<'_> {
     }
 }
 
+// * DONE
 /// Environment variable type enum.
 ///
 /// Enum represents the type of the environment variable.
@@ -80,7 +86,7 @@ impl fmt::Display for EnvVar<'_> {
 /// # Variants
 /// - `String`: String type environment variable.
 /// - `U16`: Unsigned 16-bit integer type environment variable.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum EnvVarType {
     String,
     U16,
@@ -93,7 +99,7 @@ pub enum EnvVarType {
 /// path by calling "load_file" function, then if file
 /// is valid it will validate loaded environment variables
 /// against specified array of environment variables by
-/// calling "validate_env" function.
+/// calling "validate_all" function.
 ///
 /// # Examples
 /// ```
@@ -115,18 +121,19 @@ pub enum EnvVarType {
 /// - `vars`: Array of environment vriable names to compare against loaded environment.
 ///
 /// # Returns
-/// - todo: Return type, should return a hashmap of environment variables.
+// todo: Return type, should return a hashmap of environment variables.
 pub fn load(file_path: &str, var_prefix: &str, vars: &[EnvVar]) -> Result<(), AppError> {
     // Load environment file contents into std::env
     load_file(file_path)?;
 
     // Validate loaded environment variables against passed in variables
     // with the specified prefix
-    validate_env(var_prefix, vars);
+    validate_all(var_prefix, vars)?;
 
     Ok(())
 }
 
+// * DONE
 /// Loads environment file contents (private).
 ///
 /// Function uses "from_filename" function from "dotenvy"
@@ -155,36 +162,6 @@ fn load_file(file_path: &str) -> Result<(), AppError> {
             Err(AppError::new(kind, message, source))
         }
     }
-}
-
-// todo: Implement tests for this function
-/// Validates loaded environment variables (private).
-///
-/// Function validates loaded environment variables
-/// against specified array of environment variables.
-///
-/// # Parameters
-/// - `var_prefix`: Prefix for environment variables.
-/// - `vars`: Array of environment variables to validate.
-///
-/// # Returns
-// todo: Return type, should return a hashmap of environment variables.
-fn validate_env(var_prefix: &str, vars: &[EnvVar]) {
-    std::env::vars()
-        .filter(|(key, _)| key.starts_with(var_prefix))
-        .for_each(|(key, value)| {
-            println!("{}: {}", key, value);
-        });
-    // // Iterate over specified environment variables
-    // for var in vars.iter() {
-    //     // Get the environment variable name
-    //     let name: String = format!("{}{}", var_prefix, var.name);
-
-    //     // Get the environment variable value
-    //     let value: Option<String> = std::env::var(&name).ok();
-
-    //     // Check if the environment variable is missing
-    //     if value.is_none() {
 }
 
 #[cfg(test)]
