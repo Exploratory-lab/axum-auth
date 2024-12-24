@@ -6,6 +6,10 @@
 //! so that all the types and functions are available to the
 //! library users.
 
+use std::error;
+
+use crate::err::{AppError, ErrorKind};
+
 /// Function to parse a string into a u16.
 ///
 /// # Examples
@@ -23,9 +27,18 @@
 ///
 /// # Returns
 /// - `u16`: The parsed u16 value.
-/// - `std::num::ParseIntError`: Error when parsing fails.
-pub fn is_u16(value: &str) -> Result<u16, std::num::ParseIntError> {
-    value.parse::<u16>()
+/// - `AppError`: Error parsing the string.
+pub fn is_u16(value: &str) -> Result<u16, AppError> {
+    match value.parse::<u16>() {
+        Ok(v) => Ok(v),
+        Err(e) => {
+            let kind: ErrorKind = ErrorKind::Env;
+            let message: String = format!("Failed to parse value as u16: '{}'", value);
+            let source: Option<Box<dyn error::Error>> = Some(Box::new(e));
+
+            Err(AppError::new(kind, message, source))
+        }
+    }
 }
 
 #[cfg(test)]
@@ -37,7 +50,7 @@ mod tests {
     #[test]
     fn test_is_u16() {
         let value: &str = "123";
-        let result: Result<u16, std::num::ParseIntError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value);
 
         assert_eq!(result, Ok(123));
     }
@@ -48,7 +61,7 @@ mod tests {
     #[test]
     fn test_is_u16_invalid() {
         let value: &str = "abc";
-        let result: Result<u16, std::num::ParseIntError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value);
 
         assert!(result.is_err());
     }
@@ -58,7 +71,7 @@ mod tests {
     #[test]
     fn test_is_u16_empty() {
         let value: &str = "";
-        let result: Result<u16, std::num::ParseIntError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value);
 
         assert!(result.is_err());
     }
@@ -69,7 +82,7 @@ mod tests {
     #[test]
     fn test_is_u16_negative() {
         let value: &str = "-123";
-        let result: Result<u16, std::num::ParseIntError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value);
 
         assert!(result.is_err());
     }
@@ -80,7 +93,7 @@ mod tests {
     #[test]
     fn test_is_u16_float() {
         let value: &str = "123.45";
-        let result: Result<u16, std::num::ParseIntError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value);
 
         assert!(result.is_err());
     }

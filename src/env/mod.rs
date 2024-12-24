@@ -11,10 +11,13 @@ pub mod constants;
 mod validator;
 
 // std library imports
-use std::{error, fmt};
+use std::{collections::HashMap, error, fmt};
 
 // Local imports
-use crate::err::{AppError, ErrorKind};
+use crate::{
+    err::{AppError, ErrorKind},
+    prelude::is_u16,
+};
 use validator::validate_all;
 
 // * DONE
@@ -92,6 +95,27 @@ pub enum EnvVarType {
     U16,
 }
 
+impl EnvVarType {
+    pub fn verify(&self, value: &str) -> Result<(), AppError> {
+        match self {
+            EnvVarType::String => match value.is_empty() {
+                true => {
+                    let kind: ErrorKind = ErrorKind::Env;
+                    let message: String = format!("Value cannot be empty for type: {:?}", self);
+                    let source: Option<Box<dyn error::Error>> = None;
+
+                    Err(AppError::new(kind, message, source))
+                }
+                false => Ok(()),
+            },
+            EnvVarType::U16 => match is_u16(value) {
+                Ok(_) => Ok(()),
+                Err(e) => Err(e),
+            },
+        }
+    }
+}
+
 // todo: Implement tests for this function
 /// Handles load and validation of application environment.
 ///
@@ -122,15 +146,19 @@ pub enum EnvVarType {
 ///
 /// # Returns
 // todo: Return type, should return a hashmap of environment variables.
-pub fn load(file_path: &str, var_prefix: &str, vars: &[EnvVar]) -> Result<(), AppError> {
+pub fn load(
+    file_path: &str,
+    var_prefix: &str,
+    vars: &[EnvVar],
+) -> Result<HashMap<String, String>, AppError> {
     // Load environment file contents into std::env
     load_file(file_path)?;
 
     // Validate loaded environment variables against passed in variables
     // with the specified prefix
-    validate_all(var_prefix, vars)?;
+    let app_vars: HashMap<String, String> = validate_all(var_prefix, vars)?;
 
-    Ok(())
+    Ok(app_vars)
 }
 
 // * DONE

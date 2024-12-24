@@ -28,7 +28,9 @@ use err::AppError;
 /// - `Ok(())` if the application runs successfully.
 /// - `Err(AppError)` if an error occurs.
 pub async fn run_app() -> Result<(), AppError> {
-    env::load(ENV_FILE_PATH, ENV_PREFIX, &ENV_VARS)?;
+    let app_vars = env::load(ENV_FILE_PATH, ENV_PREFIX, &ENV_VARS)?;
+
+    println!("{:?}", app_vars);
 
     // todo: build pool connection
     // todo: start http server

@@ -15,38 +15,14 @@ use super::{EnvVar, EnvVarType};
 /// - `vars`: Array of environment variables to validate.
 ///
 /// # Returns
-// todo: Return type, should return a hashmap of environment variables.
+// todo:
 pub fn validate_all(
     var_prefix: &str,
     vars: &[EnvVar],
 ) -> Result<HashMap<String, String>, AppError> {
-    // 1. Filter out environment variables with the specified prefix
-    // from the std::env::vars() iterator
-    //
-    // 2. Compare the filtered environment variables with the
-    // specified array of environment variables
-    //
-    // 3. If any of the specified environment variables are not
-    // found in the loaded environment variables, return an error
-    // with the missing environment variable names
-    //
-    // 4. Warn the user if there are loaded environment variables
-    // that are not specified in the specified array of environment
-    // variables
-    //
-    // 5. If all specified environment variables are found in the
-    // loaded environment variables, validate their types and
-    //
-    // 6. If any of the loaded environment variables have invalid
-    // types, return an error with the invalid environment variable
-    // names
-    //
-    // 7. If all loaded environment variables are valid, return
-    // a hashmap of the loaded environment variables
-
     // Collect variables from the loaded environment that start
     // with the specified prefix
-    let loaded_vars_with_prefix: HashMap<String, String> = std::env::vars()
+    let mut loaded_vars_with_prefix: HashMap<String, String> = std::env::vars()
         .filter(|(key, _)| key.starts_with(var_prefix))
         .collect();
 
@@ -56,11 +32,23 @@ pub fn validate_all(
         .map(|var| (format!("{}{}", var_prefix, var.name), *var))
         .collect();
 
-    check_unknown(&loaded_vars_with_prefix, &required_vars_with_prefix);
+    // Will remove unknown keys from the loaded variables, therefore
+    // 'loaded_vars_with_prefix' will only have variables that are
+    // specified in the 'required_vars_with_prefix'
+    check_unknown(&mut loaded_vars_with_prefix, &required_vars_with_prefix);
 
+    // Will throw an error and stop execution if any of the required
+    // variables are missing from the loaded environment, therefore
+    // both 'loaded_vars_with_prefix' and 'required_vars_with_prefix'
+    // will have the same keys
     check_missing(&loaded_vars_with_prefix, &required_vars_with_prefix)?;
 
-    Ok(HashMap::new())
+    verify_types(&loaded_vars_with_prefix, &required_vars_with_prefix)?;
+
+    let constructed_vars: HashMap<String, String> =
+        construct_variables(loaded_vars_with_prefix, required_vars_with_prefix);
+
+    Ok(constructed_vars)
 }
 
 fn check_missing(
@@ -93,24 +81,68 @@ fn check_missing(
     Ok(())
 }
 
-fn check_unknown(loaded_vars: &HashMap<String, String>, required_vars: &HashMap<String, EnvVar>) {
-    let unknown_vars: HashSet<&String> = loaded_vars
-        .iter()
-        .filter_map(|(name, _)| {
-            if !required_vars.contains_key(name) {
-                Some(name)
-            } else {
-                None
-            }
-        })
+fn check_unknown(
+    loaded_vars: &mut HashMap<String, String>,
+    required_vars: &HashMap<String, EnvVar>,
+) {
+    let unknown_keys: HashSet<String> = loaded_vars
+        .keys()
+        .filter(|name| !required_vars.contains_key(*name))
+        .cloned()
         .collect();
 
-    if !unknown_vars.is_empty() {
+    if !unknown_keys.is_empty() {
+        // Remove unknown keys from the loaded variables
+        for key in &unknown_keys {
+            loaded_vars.remove(key);
+        }
+
         eprintln!(
             "Environment contains unspecified in 'VARS' array variables, therefore the following variables are not being checked:\n{:?}",
-            unknown_vars
+            unknown_keys
         );
     }
 }
 
-fn verify_types() {}
+fn verify_types(
+    loaded_vars: &HashMap<String, String>,
+    required_vars: &HashMap<String, EnvVar>,
+) -> Result<(), AppError> {
+    if loaded_vars.len() != required_vars.len() {
+        let kind: ErrorKind = ErrorKind::Env;
+        let message: String = format!(
+            "Loaded environment variables count ({}) does not match required variables count({})",
+            loaded_vars.len(),
+            required_vars.len()
+        );
+
+        return Err(AppError {
+            kind,
+            message,
+            source: None,
+        });
+    }
+
+    for (name, var_data) in required_vars {
+        let value: &String = loaded_vars.get(name).unwrap();
+        let var_type: &EnvVarType = &var_data.val_type;
+
+        var_type.verify(value)?;
+    }
+
+    Ok(())
+}
+
+fn construct_variables(
+    loaded_vars: HashMap<String, String>,
+    required_vars: HashMap<String, EnvVar>,
+) -> HashMap<String, String> {
+    let mut constructed_vars: HashMap<String, String> = HashMap::new();
+
+    for (name, var_data) in required_vars {
+        let value: &String = loaded_vars.get(&name).unwrap();
+        constructed_vars.insert(var_data.name.to_string(), value.to_string());
+    }
+
+    constructed_vars
+}
