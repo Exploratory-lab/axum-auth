@@ -31,7 +31,6 @@ pub struct AppError {
 
 /// Implementation block for `AppError` struct.
 impl AppError {
-    // todo: Create tests for this function
     /// Creates a new `AppError` instance.
     ///
     /// Function creates a new `AppError` instance with
@@ -73,7 +72,6 @@ impl AppError {
 
 /// Implementation of `PartialEq` trait for `AppError` struct.
 impl PartialEq for AppError {
-    // todo: Create tests for this function
     /// Compares two `AppError` instances.
     /// Function compares two `AppError` instances by
     /// comparing their kind, message and source.
@@ -94,6 +92,14 @@ impl PartialEq for AppError {
     ///                          None);
     ///
     /// assert_eq!(err1, err2);
+    /// ```
+    ///
+    /// # Parameters
+    /// - `other`: Another `AppError` instance to compare.
+    ///
+    /// # Returns
+    /// - `true`: If the two instances are equal.
+    /// - `false`: If the two instances are not equal.
     fn eq(&self, other: &Self) -> bool {
         self.kind == other.kind
             && self.message == other.message
@@ -104,7 +110,6 @@ impl PartialEq for AppError {
 
 /// Implementation of `Display` trait for `AppError` struct.
 impl fmt::Display for AppError {
-    // todo: Create tests for this function
     /// Formats `AppError` struct for display.
     ///
     /// Function formats `AppError` struct for display
@@ -150,7 +155,69 @@ impl error::Error for AppError {}
 ///
 /// # Variants
 /// - `Env`: Error setting up application environment.
+/// - `Parse`: Error parsing data.
 #[derive(Debug, PartialEq)]
 pub enum ErrorKind {
     Env,
+    Parse,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Tests `AppError` struct new method.
+    #[test]
+    fn test_app_error_new() {
+        let err_msg: String = "Error loading environment variables".to_string();
+
+        let err: AppError = AppError::new(ErrorKind::Env, err_msg.clone(), None);
+        let expected: AppError = AppError {
+            kind: ErrorKind::Env,
+            message: err_msg,
+            source: None,
+        };
+
+        assert_eq!(err, expected);
+    }
+
+    /// Tests `AppError` struct equality.
+    #[test]
+    fn test_app_error_eq() {
+        let err_msg: String = "Error loading environment variables".to_string();
+
+        let err1: AppError = AppError::new(ErrorKind::Env, err_msg.clone(), None);
+        let err2: AppError = AppError::new(ErrorKind::Env, err_msg, None);
+
+        assert_eq!(err1, err2);
+    }
+
+    /// Tests `AppError` struct inequality.
+    #[test]
+    fn test_app_error_eq_false() {
+        let err_msg1: String = "Error loading environment variables".to_string();
+        let err_msg2: String = "Error parsing environment variables".to_string();
+
+        let err1: AppError = AppError::new(ErrorKind::Env, err_msg1.clone(), None);
+        let err2: AppError = AppError::new(ErrorKind::Parse, err_msg2, None);
+
+        assert_ne!(err1, err2);
+    }
+
+    /// Tests `AppError` struct display.
+    #[test]
+    fn test_app_error_display() {
+        let err_msg: String = "Error loading environment variables".to_string();
+
+        let err: AppError = AppError::new(ErrorKind::Env, err_msg.clone(), None);
+        let expected: String = format!(
+            "AppError {{ kind: {:?}, message: {}, source: {:?} }}",
+            ErrorKind::Env,
+            err_msg,
+            None::<Box<dyn std::error::Error>>
+        );
+        let result = format!("{}", err);
+
+        assert_eq!(result, expected);
+    }
 }

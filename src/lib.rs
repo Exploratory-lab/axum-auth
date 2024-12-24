@@ -2,6 +2,10 @@
 pub mod env;
 pub mod err;
 pub mod prelude;
+pub mod strings;
+
+// std imports
+use std::collections::HashMap;
 
 // Imports of local modules
 use env::constants::FILE_PATH as ENV_FILE_PATH;
@@ -9,7 +13,7 @@ use env::constants::PREFIX as ENV_PREFIX;
 use env::constants::VARS as ENV_VARS;
 use err::AppError;
 
-// todo: Create tests for this function
+// todo: Create integration tests for this function
 /// Runs the application.
 ///
 /// Function loads environment variables from file
@@ -25,12 +29,10 @@ use err::AppError;
 /// ```
 ///
 /// #Returns
-/// - `Ok(())` if the application runs successfully.
-/// - `Err(AppError)` if an error occurs.
+/// - `()`: If the function runs successfully.
+/// - `AppError`: If the function fails to run.
 pub async fn run_app() -> Result<(), AppError> {
-    let app_vars = env::load(ENV_FILE_PATH, ENV_PREFIX, &ENV_VARS)?;
-
-    println!("{:?}", app_vars);
+    let _app_vars: HashMap<&str, String> = env::load(ENV_FILE_PATH, ENV_PREFIX, &ENV_VARS)?;
 
     // todo: build pool connection
     // todo: start http server

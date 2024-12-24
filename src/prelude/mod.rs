@@ -15,28 +15,30 @@ use crate::err::{AppError, ErrorKind};
 /// # Examples
 /// ```
 /// use axum_auth::prelude::is_u16;
+/// use axum_auth::err::ErrorKind;
 ///
 /// let value = "123";
-/// let result = is_u16(value);
+/// let result = is_u16(value, None);
 ///
 /// assert_eq!(result, Ok(123));
 /// ```
 ///
 /// # Parameters
 /// - `value`: The string slice to parse.
+/// - `err_kind`: The error kind to use if parsing fails.
 ///
 /// # Returns
 /// - `u16`: The parsed u16 value.
 /// - `AppError`: Error parsing the string.
-pub fn is_u16(value: &str) -> Result<u16, AppError> {
+pub fn is_u16(value: &str, err_kind: Option<ErrorKind>) -> Result<u16, AppError> {
     match value.parse::<u16>() {
         Ok(v) => Ok(v),
         Err(e) => {
-            let kind: ErrorKind = ErrorKind::Env;
             let message: String = format!("Failed to parse value as u16: '{}'", value);
             let source: Option<Box<dyn error::Error>> = Some(Box::new(e));
+            let err_kind: ErrorKind = err_kind.unwrap_or(ErrorKind::Parse);
 
-            Err(AppError::new(kind, message, source))
+            Err(AppError::new(err_kind, message, source))
         }
     }
 }
@@ -50,7 +52,7 @@ mod tests {
     #[test]
     fn test_is_u16() {
         let value: &str = "123";
-        let result: Result<u16, AppError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value, None);
 
         assert_eq!(result, Ok(123));
     }
@@ -59,9 +61,10 @@ mod tests {
     /// when the string slice cannot be parsed into
     /// a u16 value.
     #[test]
-    fn test_is_u16_invalid() {
+    fn test_is_u16_invalid_and_manual_error_kind() {
         let value: &str = "abc";
-        let result: Result<u16, AppError> = is_u16(value);
+        let err_kind: Option<ErrorKind> = Some(ErrorKind::Env);
+        let result: Result<u16, AppError> = is_u16(value, err_kind);
 
         assert!(result.is_err());
     }
@@ -71,7 +74,7 @@ mod tests {
     #[test]
     fn test_is_u16_empty() {
         let value: &str = "";
-        let result: Result<u16, AppError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value, None);
 
         assert!(result.is_err());
     }
@@ -82,7 +85,7 @@ mod tests {
     #[test]
     fn test_is_u16_negative() {
         let value: &str = "-123";
-        let result: Result<u16, AppError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value, None);
 
         assert!(result.is_err());
     }
@@ -93,7 +96,7 @@ mod tests {
     #[test]
     fn test_is_u16_float() {
         let value: &str = "123.45";
-        let result: Result<u16, AppError> = is_u16(value);
+        let result: Result<u16, AppError> = is_u16(value, None);
 
         assert!(result.is_err());
     }
