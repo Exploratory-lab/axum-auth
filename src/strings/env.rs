@@ -18,9 +18,6 @@ pub mod vars {
     //! assert_eq!(vars.get(DB_NAME), Some(&"test_db"));
     //! ```
 
-    // !! DELETE THIS LINE
-    pub const TEST: &str = "TEST";
-
     // Database name to open pool connection to
     pub const DB_NAME: &str = "DB_NAME";
     pub const DB_NAME_EXAMPLE: &str = "test_db";

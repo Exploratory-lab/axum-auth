@@ -8,12 +8,12 @@ use std::collections::HashMap;
 use super::{EnvVar, EnvVarType};
 use crate::err::{AppError, ErrorKind};
 
-/// Validates loaded environment variables.
+/// ## Validates loaded environment variables.
 ///
 /// Function validates loaded environment variables
 /// against specified array of environment variables.
 ///
-/// # Examples
+/// ## Examples
 /// ```
 /// use std::collections::HashMap;
 /// use axum_auth::env::{validator::validate, EnvVar, EnvVarType};
@@ -23,8 +23,7 @@ use crate::err::{AppError, ErrorKind};
 /// const REQUIRED_VARS: [EnvVar; 1] = [
 ///    EnvVar {
 ///       name: "DB_NAME",
-///       val_type: EnvVarType::String,
-///       val_example: "my_db",
+///       val_type: EnvVarType::String
 ///     },
 /// ];
 ///
@@ -43,15 +42,16 @@ use crate::err::{AppError, ErrorKind};
 /// ```
 ///
 ///
-/// # Parameters
+/// ## Parameters
 /// - `var_prefix`: Prefix for environment variables.
 /// - `vars`: Array of environment variables to validate.
 /// - `loaded_vars`: Loaded environment variables.
 ///
-/// # Returns
-/// - `HashMap<&str, String>`: HashMap of application
-/// environment variables <key, value>
-/// - `AppError`: Error type that contains error kind,
+/// ## Returns
+/// + `Result<HashMap<&str, String>, AppError>`
+///     - `HashMap<&str, String>`: HashMap of application
+/// environment variables `<key, value>`.
+///     - `AppError`: Error type that contains error kind,
 /// message and source.
 pub fn validate<'a>(
     var_prefix: &str,
@@ -61,7 +61,6 @@ pub fn validate<'a>(
 where
     'a: 'static,
 {
-    // todo: use logger service here
     // Print warning if the 'VARS' array in 'env.rs' is not up to date
     // with the environment variables in '.env' file
     println!("Warning: make sure 'VARS' array in 'axum_auth::env::constants' is up to date with the environment variables in '.env' file.");
@@ -96,19 +95,20 @@ where
     Ok(constructed_vars)
 }
 
-/// Checks for missing environment variables.
+/// ## Checks for missing environment variables.
 ///
 /// Function checks if any of the required environment
 /// variables are missing from the loaded environment
 /// variables.
 ///
-/// # Parameters
+/// ## Parameters
 /// - `loaded_vars`: Loaded environment variables.
 /// - `required_vars`: Required environment variables.
 ///
-/// # Returns
-/// - `()`: If no missing variables are found.
-/// - `AppError`: If missing variables are found.
+/// ## Returns
+/// + `Result<(), AppError>`
+///     - `()`: If no missing variables are found.
+///     - `AppError`: If missing variables are found.
 fn check_missing(
     loaded_vars: &HashMap<String, String>,
     required_vars: &HashMap<String, &EnvVar>,
@@ -144,19 +144,20 @@ fn check_missing(
     Ok(())
 }
 
-/// Verifies the types of environment variables.
+/// ## Verifies the types of environment variables.
 ///
 /// Function verifies the types of loaded environment
 /// variables against the specified types in the required
 /// environment variables.
 ///
-/// # Parameters
+/// ## Parameters
 /// - `loaded_vars`: Loaded environment variables.
 /// - `required_vars`: Required environment variables.
 ///
-/// # Returns
-/// - `()`: If all types are correct.
-/// - `AppError`: If any type is incorrect.
+/// ## Returns
+/// + `Result<(), AppError>`
+///     - `()`: If all types are correct.
+///     - `AppError`: If any type is incorrect.
 fn verify_types(
     loaded_vars: &HashMap<String, String>,
     required_vars: &HashMap<String, &EnvVar>,
@@ -173,19 +174,20 @@ fn verify_types(
     Ok(())
 }
 
-/// Constructs application environment variables.
+/// ## Constructs application environment variables.
 ///
 /// Function constructs application environment variables
 /// from the loaded environment variables.
 ///
-/// # Parameters
+/// ## Parameters
 /// - `loaded_vars`: Loaded environment variables.
 /// - `required_vars`: Required environment variables.
 ///
-/// # Returns
-/// - `HashMap<&str, String>`: HashMap of application
-/// environment variables <key, value>.
-/// - `AppError`: Error type that contains error kind,
+/// ## Returns
+/// + `Result<HashMap<&str, String>, AppError>`
+///     - `HashMap<&str, String>`: HashMap of application
+/// environment variables `<key, value>`.
+///     - `AppError`: Error type that contains error kind,
 /// message and source.
 fn construct_variables<'a>(
     mut loaded_vars: HashMap<String, String>,
@@ -205,3 +207,5 @@ where
 
     Ok(constructed_vars)
 }
+
+// todo: tests

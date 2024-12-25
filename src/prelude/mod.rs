@@ -21,6 +21,14 @@ use crate::err::{AppError, ErrorKind};
 /// let result = is_u16(value, None);
 ///
 /// assert_eq!(result, Ok(123));
+///
+/// // With custom error kind
+/// let value = "abc";
+/// let err_kind = Some(ErrorKind::Env);
+///
+/// let result = is_u16(value, err_kind).unwrap_err();
+///
+/// assert!(result.kind.eq(&ErrorKind::Env));
 /// ```
 ///
 /// # Parameters
@@ -47,8 +55,8 @@ pub fn is_u16(value: &str, err_kind: Option<ErrorKind>) -> Result<u16, AppError>
 mod tests {
     use super::*;
 
-    /// Test checks if the function can parse a valid
-    /// u16 value from a string slice.
+    // Test checks if the function can parse a valid
+    // u16 value from a string slice.
     #[test]
     fn test_is_u16() {
         let value: &str = "123";
@@ -57,9 +65,9 @@ mod tests {
         assert_eq!(result, Ok(123));
     }
 
-    /// Test checks if the function returns an error
-    /// when the string slice cannot be parsed into
-    /// a u16 value.
+    // Test checks if the function returns an error
+    // when the string slice cannot be parsed into
+    // a u16 value.
     #[test]
     fn test_is_u16_invalid_and_manual_error_kind() {
         let value: &str = "abc";
@@ -69,8 +77,8 @@ mod tests {
         assert!(result.is_err());
     }
 
-    /// Test checks if the function returns an error
-    /// when the string slice is empty.
+    // Test checks if the function returns an error
+    // when the string slice is empty.
     #[test]
     fn test_is_u16_empty() {
         let value: &str = "";
@@ -79,9 +87,9 @@ mod tests {
         assert!(result.is_err());
     }
 
-    /// Test checks if the function returns an error
-    /// when the string slice is a negative number.
-    /// Negative numbers are not allowed.
+    // Test checks if the function returns an error
+    // when the string slice is a negative number.
+    // Negative numbers are not allowed.
     #[test]
     fn test_is_u16_negative() {
         let value: &str = "-123";
@@ -90,9 +98,9 @@ mod tests {
         assert!(result.is_err());
     }
 
-    /// Test checks if the function returns an error
-    /// when the string slice is a floating point number.
-    /// Floating point numbers are not allowed.
+    // Test checks if the function returns an error
+    // when the string slice is a floating point number.
+    // Floating point numbers are not allowed.
     #[test]
     fn test_is_u16_float() {
         let value: &str = "123.45";

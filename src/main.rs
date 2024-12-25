@@ -1,5 +1,3 @@
-//! todo: Add a description
-
 // std library imports
 use std::process;
 
@@ -11,7 +9,7 @@ async fn main() {
     match run_app().await {
         Ok(_) => println!("Application stopped with no error reported."),
         Err(e) => {
-            eprintln!("Application reported error: {}", e);
+            eprintln!("Application reported an error: {}", e);
             process::exit(1);
         }
     };

@@ -75,8 +75,6 @@ impl PartialEq for AppError {
     /// Compares two `AppError` instances.
     /// Function compares two `AppError` instances by
     /// comparing their kind, message and source.
-    /// If all fields are equal, function returns `true`
-    /// otherwise, it returns `false`.
     ///
     /// # Examples
     /// ```
@@ -126,6 +124,7 @@ impl fmt::Display for AppError {
     ///                         None);
     /// let expected = format!("AppError {{ kind: {:?}, message: {}, source: {:?} }}",
     ///                       ErrorKind::Env, err_msg, None::<Box<dyn std::error::Error>>);
+    ///
     /// let result = format!("{}", err);
     ///
     /// assert_eq!(result, expected);
@@ -166,7 +165,38 @@ pub enum ErrorKind {
 mod tests {
     use super::*;
 
-    /// Tests `AppError` struct new method.
+    // Tests raw `AppError` struct creation.
+    #[test]
+    fn test_create_app_error() {
+        let err = AppError {
+            kind: ErrorKind::Env,
+            message: "Error loading environment variables".to_string(),
+            source: None,
+        };
+        assert_eq!(err.kind, ErrorKind::Env);
+        assert_eq!(err.message, "Error loading environment variables");
+        assert!(err.source.is_none());
+    }
+
+    // Tests `AppError` struct with source error.
+    #[test]
+    fn test_app_error_with_source() {
+        let source_err = AppError {
+            kind: ErrorKind::Io,
+            message: "IO error".to_string(),
+            source: None,
+        };
+        let err = AppError {
+            kind: ErrorKind::Env,
+            message: "Error loading environment variables".to_string(),
+            source: Some(Box::new(source_err)),
+        };
+        assert_eq!(err.kind, ErrorKind::Env);
+        assert_eq!(err.message, "Error loading environment variables");
+        assert!(err.source.is_some());
+    }
+
+    // Tests `AppError` struct new method.
     #[test]
     fn test_app_error_new() {
         let err_msg: String = "Error loading environment variables".to_string();
@@ -181,7 +211,28 @@ mod tests {
         assert_eq!(err, expected);
     }
 
-    /// Tests `AppError` struct equality.
+    // Tests `AppError` struct new method with source error.
+    #[test]
+    fn test_app_error_new_with_source() {
+        let source_err: AppError = AppError {
+            kind: ErrorKind::Env,
+            message: "Some env error".to_string(),
+            source: None,
+        };
+        let err_msg: String = "Error loading environment variables".to_string();
+
+        let err: AppError =
+            AppError::new(ErrorKind::Env, err_msg.clone(), Some(Box::new(source_err)));
+        let expected: AppError = AppError {
+            kind: ErrorKind::Env,
+            message: err_msg,
+            source: Some(Box::new(source_err)),
+        };
+
+        assert_eq!(err, expected);
+    }
+
+    // Tests `AppError` struct equality.
     #[test]
     fn test_app_error_eq() {
         let err_msg: String = "Error loading environment variables".to_string();
@@ -192,7 +243,7 @@ mod tests {
         assert_eq!(err1, err2);
     }
 
-    /// Tests `AppError` struct inequality.
+    // Tests `AppError` struct inequality.
     #[test]
     fn test_app_error_eq_false() {
         let err_msg1: String = "Error loading environment variables".to_string();
@@ -204,7 +255,7 @@ mod tests {
         assert_ne!(err1, err2);
     }
 
-    /// Tests `AppError` struct display.
+    // Tests `AppError` struct display.
     #[test]
     fn test_app_error_display() {
         let err_msg: String = "Error loading environment variables".to_string();
@@ -219,5 +270,23 @@ mod tests {
         let result = format!("{}", err);
 
         assert_eq!(result, expected);
+    }
+
+    // Tests `ErrorKind` enum equality.
+    #[test]
+    fn test_error_kind_eq() {
+        let kind1: ErrorKind = ErrorKind::Env;
+        let kind2: ErrorKind = ErrorKind::Env;
+
+        assert_eq!(kind1, kind2);
+    }
+
+    // Tests `ErrorKind` enum inequality.
+    #[test]
+    fn test_error_kind_eq_false() {
+        let kind1: ErrorKind = ErrorKind::Env;
+        let kind2: ErrorKind = ErrorKind::Parse;
+
+        assert_ne!(kind1, kind2);
     }
 }

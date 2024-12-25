@@ -1,3 +1,5 @@
+// Tests for the `load` function in the `env` module
+
 use serial_test::serial;
 use std::{collections::HashMap, env, io::Write};
 use tempfile::NamedTempFile;
@@ -27,17 +29,14 @@ const VARS: [EnvVar; 3] = [
     EnvVar {
         name: VAR_1,
         val_type: EnvVarType::String,
-        val_example: VAL_1,
     },
     EnvVar {
         name: VAR_2,
         val_type: EnvVarType::String,
-        val_example: VAL_2,
     },
     EnvVar {
         name: VAR_3,
         val_type: EnvVarType::U16,
-        val_example: VAL_3,
     },
 ];
 
@@ -70,9 +69,9 @@ fn make_file_contents(prefix: &str, vars: Vec<(&str, &str)>) -> String {
     contents
 }
 
-/// Tests the `load` function when the file path is valid,
-/// the file contains all the required environment variables
-/// and the types of the variables are correct.
+// Tests the `load` function when the file path is valid,
+// the file contains all the required environment variables
+// and the types of the variables are correct.
 #[serial]
 #[test]
 fn test_env_load() {
@@ -92,9 +91,9 @@ fn test_env_load() {
     });
 }
 
-/// Tests the `load` function when the file path is valid,
-/// the file contains all the required environment variables
-/// but the types of the variables are incorrect.
+// Tests the `load` function when the file path is valid,
+// the file contains all the required environment variables
+// but the types of the variables are incorrect.
 #[serial]
 #[test]
 fn test_env_load_invalid_type() {
@@ -113,9 +112,9 @@ fn test_env_load_invalid_type() {
     });
 }
 
-/// Tests the `load` function when the file path is valid,
-/// the file contains all the required environment variables
-/// but the file contains more variables than required.
+// Tests the `load` function when the file path is valid,
+// the file contains all the required environment variables
+// but the file contains more variables than required.
 #[serial]
 #[test]
 fn test_env_load_exceeding() {
@@ -140,23 +139,10 @@ fn test_env_load_exceeding() {
         assert_eq!(app_vars.get(VAR_2).unwrap(), VAL_2);
         assert_eq!(app_vars.get(VAR_3).unwrap(), VAL_3);
     });
-
-    // clean_up();
-    // let result = load(EXCEEDING_FILE_PATH, PREFIX, &VARS);
-
-    // assert!(result.is_ok());
-
-    // let app_vars = result.unwrap();
-
-    // assert_eq!(app_vars.len(), 3);
-    // assert_eq!(app_vars.get("VAR_1").unwrap(), "VAL_1");
-    // assert_eq!(app_vars.get("VAR_2").unwrap(), "VAL_2");
-    // assert_eq!(app_vars.get("VAR_3").unwrap(), "1234");
-    // clean_up();
 }
 
-/// Tests the `load` function when the file path is valid,
-/// but the file contains less variables than required.
+// Tests the `load` function when the file path is valid,
+// but the file contains less variables than required.
 #[serial]
 #[test]
 fn test_env_load_missing() {
@@ -182,9 +168,9 @@ fn test_env_load_missing() {
     });
 }
 
-/// Tests the `load` function when the file path is valid,
-/// the file contains more variables than required but also
-/// has missing variables.
+// Tests the `load` function when the file path is valid,
+// the file contains more variables than required but also
+// has missing variables.
 #[serial]
 #[test]
 fn test_env_load_exceeding_and_missing() {
@@ -212,7 +198,7 @@ fn test_env_load_exceeding_and_missing() {
     });
 }
 
-/// Tests the `load` function when the file path is invalid.
+// Tests the `load` function when the file path is invalid.
 #[serial]
 #[test]
 fn test_env_load_non_existent() {

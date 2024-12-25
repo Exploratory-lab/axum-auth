@@ -2,10 +2,11 @@
 
 // Local imports
 use super::{EnvVar, EnvVarType};
-use crate::strings::env::vars::{
-    DB_HOST, DB_HOST_EXAMPLE, DB_NAME, DB_NAME_EXAMPLE, DB_PASS, DB_PASS_EXAMPLE, DB_PORT,
-    DB_PORT_EXAMPLE, DB_SSL_MODE, DB_SSL_MODE_EXAMPLE, DB_USER, DB_USER_EXAMPLE,
-    PATH_TO_DB_SSL_ROOT_CERT, PATH_TO_DB_SSL_ROOT_CERT_EXAMPLE,
+use crate::strings::{
+    env::vars::{
+        DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_SSL_MODE, DB_USER, PATH_TO_DB_SSL_ROOT_CERT,
+    },
+    postgres::{ALLOW_SSL, DISABLE_SSL, PREFER_SSL, REQUIRE_SSL, VERIFY_CA_SSL, VERIFY_FULL_SSL},
 };
 
 // * Environment file path to load
@@ -21,36 +22,36 @@ pub const VARS: [EnvVar; 7] = [
     EnvVar {
         name: DB_NAME,
         val_type: EnvVarType::String,
-        val_example: DB_NAME_EXAMPLE,
     },
     EnvVar {
         name: DB_HOST,
         val_type: EnvVarType::String,
-        val_example: DB_HOST_EXAMPLE,
     },
     EnvVar {
         name: DB_PORT,
         val_type: EnvVarType::U16,
-        val_example: DB_PORT_EXAMPLE,
     },
     EnvVar {
         name: DB_USER,
         val_type: EnvVarType::String,
-        val_example: DB_USER_EXAMPLE,
     },
     EnvVar {
         name: DB_PASS,
         val_type: EnvVarType::String,
-        val_example: DB_PASS_EXAMPLE,
     },
     EnvVar {
         name: DB_SSL_MODE,
-        val_type: EnvVarType::Enum(&["disable", "require", "verify-ca", "verify-full"]),
-        val_example: DB_SSL_MODE_EXAMPLE,
+        val_type: EnvVarType::Enum(&[
+            DISABLE_SSL,
+            ALLOW_SSL,
+            PREFER_SSL,
+            REQUIRE_SSL,
+            VERIFY_CA_SSL,
+            VERIFY_FULL_SSL,
+        ]),
     },
     EnvVar {
         name: PATH_TO_DB_SSL_ROOT_CERT,
-        val_type: EnvVarType::String,
-        val_example: PATH_TO_DB_SSL_ROOT_CERT_EXAMPLE,
+        val_type: EnvVarType::FilePath,
     },
 ];

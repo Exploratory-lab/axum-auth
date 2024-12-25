@@ -13,7 +13,6 @@ use env::constants::PREFIX as ENV_PREFIX;
 use env::constants::VARS as ENV_VARS;
 use err::AppError;
 
-// todo: Create integration tests for this function
 /// Runs the application.
 ///
 /// Function loads environment variables from file
