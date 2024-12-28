@@ -1,5 +1,5 @@
 [package]
-name = "axum-auth"
+name = "axum_auth"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,6 +10,8 @@ axum = "0.7.9"
 dotenvy = "0.15.7"
 serde = { version = "1.0.216", features = ["derive"] }
 sqlx = {version = "0.8.2", features = [ "runtime-tokio", "tls-rustls-ring", "postgres" ] }
+strum = "0.26.3"
+strum_macros = "0.26.4"
 tokio = {version = "1.42.0", features = ['full']}
 
 [dev-dependencies]

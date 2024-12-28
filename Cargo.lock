@@ -96,19 +96,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-auth"
-version = "0.1.0"
-dependencies = [
- "axum",
- "dotenvy",
- "serde",
- "serial_test",
- "sqlx",
- "tempfile",
- "tokio",
-]
-
-[[package]]
 name = "axum-core"
 version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -127,6 +114,21 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+]
+
+[[package]]
+name = "axum_auth"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "dotenvy",
+ "serde",
+ "serial_test",
+ "sqlx",
+ "strum",
+ "strum_macros",
+ "tempfile",
+ "tokio",
 ]
 
 [[package]]
@@ -1662,6 +1664,25 @@ dependencies = [
  "unicode-bidi",
  "unicode-normalization",
  "unicode-properties",
+]
+
+[[package]]
+name = "strum"
+version = "0.26.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+
+[[package]]
+name = "strum_macros"
+version = "0.26.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn",
 ]
 
 [[package]]

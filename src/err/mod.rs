@@ -181,16 +181,17 @@ mod tests {
     // Tests `AppError` struct with source error.
     #[test]
     fn test_app_error_with_source() {
-        let source_err = AppError {
-            kind: ErrorKind::Io,
-            message: "IO error".to_string(),
+        let source_err: AppError = AppError {
+            kind: ErrorKind::Env,
+            message: "Some env error".to_string(),
             source: None,
         };
-        let err = AppError {
+        let err: AppError = AppError {
             kind: ErrorKind::Env,
             message: "Error loading environment variables".to_string(),
             source: Some(Box::new(source_err)),
         };
+
         assert_eq!(err.kind, ErrorKind::Env);
         assert_eq!(err.message, "Error loading environment variables");
         assert!(err.source.is_some());
@@ -219,6 +220,11 @@ mod tests {
             message: "Some env error".to_string(),
             source: None,
         };
+        let source_err_copy: AppError = AppError {
+            kind: ErrorKind::Env,
+            message: "Some env error".to_string(),
+            source: None,
+        };
         let err_msg: String = "Error loading environment variables".to_string();
 
         let err: AppError =
@@ -226,7 +232,7 @@ mod tests {
         let expected: AppError = AppError {
             kind: ErrorKind::Env,
             message: err_msg,
-            source: Some(Box::new(source_err)),
+            source: Some(Box::new(source_err_copy)),
         };
 
         assert_eq!(err, expected);
