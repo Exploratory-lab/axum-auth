@@ -20,6 +20,8 @@ use crate::{
     },
 };
 
+use super::validator::EnvVar;
+
 // * Environment file path to load
 pub const FILE_PATH: &str = ".env";
 
@@ -29,52 +31,11 @@ pub const PREFIX: &str = "AXA_";
 // * Environment variables to validate
 // * keep it up to date with the .env.example,
 // * .env files and
-// pub const VARS: [EnvVar; 8] = [
-//     EnvVar {
-//         name: EnvVarName::DbName,
-//         val_type: EnvVarType::String,
-//     },
-//     EnvVar {
-//         name: EnvVarName::DbHost,
-//         val_type: EnvVarType::String,
-//     },
-//     EnvVar {
-//         name: EnvVarName::DbPort,
-//         val_type: EnvVarType::U16,
-//     },
-//     EnvVar {
-//         name: EnvVarName::DbUser,
-//         val_type: EnvVarType::String,
-//     },
-//     EnvVar {
-//         name: EnvVarName::DbPass,
-//         val_type: EnvVarType::String,
-//     },
-//     EnvVar {
-//         name: EnvVarName::DbSslMode,
-//         val_type: EnvVarType::Enum(&[
-//             DISABLE_SSL,
-//             ALLOW_SSL,
-//             PREFER_SSL,
-//             REQUIRE_SSL,
-//             VERIFY_CA_SSL,
-//             VERIFY_FULL_SSL,
-//         ]),
-//     },
-//     EnvVar {
-//         name: EnvVarName::PathToDbSslRootCert,
-//         val_type: EnvVarType::FilePath,
-//     },
-//     EnvVar {
-//         name: EnvVarName::Test,
-//         val_type: EnvVarType::String,
-//     },
-// ];
-
 // todo: docs and tests
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
-pub enum EnvVar {
+pub enum RequiredEnvVar {
     // Test, // !! delete
+    AppMode,
     DbName,
     DbHost,
     DbPort,
@@ -84,33 +45,35 @@ pub enum EnvVar {
     PathToDbSslRootCert,
 }
 
-impl EnvVar {
-    const ERR_KIND: ErrorKind = ErrorKind::Env;
+impl EnvVar for RequiredEnvVar {
+    type VarType = Self;
 
-    pub fn all() -> HashSet<Self> {
+    fn all() -> HashSet<Self> {
         Self::iter().collect()
     }
 
-    pub fn name(&self) -> String {
+    fn name(&self) -> String {
         match self {
             // Self::Test => Self::construct_name(PREFIX, "TEST"), // !! delete
-            Self::DbName => Self::construct_name(PREFIX, DB_NAME),
-            Self::DbHost => Self::construct_name(PREFIX, DB_HOST),
-            Self::DbPort => Self::construct_name(PREFIX, DB_PORT),
-            Self::DbUser => Self::construct_name(PREFIX, DB_USER),
-            Self::DbPass => Self::construct_name(PREFIX, DB_PASS),
-            Self::DbSslMode => Self::construct_name(PREFIX, DB_SSL_MODE),
-            Self::PathToDbSslRootCert => Self::construct_name(PREFIX, PATH_TO_DB_SSL_ROOT_CERT),
+            Self::AppMode => construct_name(PREFIX, "APP_MODE"),
+            Self::DbName => construct_name(PREFIX, DB_NAME),
+            Self::DbHost => construct_name(PREFIX, DB_HOST),
+            Self::DbPort => construct_name(PREFIX, DB_PORT),
+            Self::DbUser => construct_name(PREFIX, DB_USER),
+            Self::DbPass => construct_name(PREFIX, DB_PASS),
+            Self::DbSslMode => construct_name(PREFIX, DB_SSL_MODE),
+            Self::PathToDbSslRootCert => construct_name(PREFIX, PATH_TO_DB_SSL_ROOT_CERT),
         }
     }
 
-    pub fn value(&self) -> String {
+    fn value(&self) -> String {
         std::env::var(self.name()).expect("Failed to get env var value")
     }
 
-    pub fn type_(&self) -> EnvVarType {
+    fn type_(&self) -> EnvVarType {
         match self {
             // Self::Test => EnvVarType::String, // !! delete
+            Self::AppMode => EnvVarType::Enum(&["dev", "prod"]),
             Self::DbName => EnvVarType::String,
             Self::DbHost => EnvVarType::String,
             Self::DbPort => EnvVarType::U16,
@@ -128,19 +91,23 @@ impl EnvVar {
         }
     }
 
-    pub fn verify(&self) -> Result<(), AppError> {
+    fn verify(&self) -> Result<(), AppError> {
+        const ERR_KIND: ErrorKind = ErrorKind::Env;
+
         match self.type_() {
+            // todo: make helper functions for these types
             EnvVarType::String => {
                 if self.value().is_empty() {
-                    let message = format!("Value cannot be empty for type: {:?}", self);
-                    Err(AppError::new(Self::ERR_KIND, message, None))
+                    let message = format!("Value cannot be empty for type: {:?}", self.type_());
+
+                    return Err(AppError::new(ERR_KIND, message, None));
                 } else {
-                    Ok(())
+                    return Ok(());
                 }
             }
-            EnvVarType::U16 => match is_u16(self.value().as_str(), Some(Self::ERR_KIND)) {
-                Ok(_) => Ok(()),
-                Err(e) => Err(e),
+            EnvVarType::U16 => match is_u16(self.value().as_str(), Some(ERR_KIND)) {
+                Ok(_) => return Ok(()),
+                Err(e) => return Err(e),
             },
             EnvVarType::Enum(allowed_values) => {
                 if allowed_values.contains(&self.value().as_str()) {
@@ -149,11 +116,11 @@ impl EnvVar {
                     let message: String = format!(
                         "Value '{}' is not allowed for type {:?}",
                         self.value(),
-                        self
+                        self.type_()
                     );
                     let source: Option<Box<dyn error::Error>> = None;
 
-                    Err(AppError::new(Self::ERR_KIND, message, source))
+                    Err(AppError::new(ERR_KIND, message, source))
                 }
             }
             EnvVarType::FilePath => {
@@ -163,8 +130,8 @@ impl EnvVar {
         }
     }
 
-    pub fn verify_all() -> Result<(), AppError> {
-        let vars: HashSet<EnvVar> = Self::all();
+    fn verify_all() -> Result<(), AppError> {
+        let vars: HashSet<Self> = Self::all();
 
         for var in vars {
             var.verify()?;
@@ -173,9 +140,9 @@ impl EnvVar {
         Ok(())
     }
 
-    fn construct_name(prefix: &str, name: &str) -> String {
-        format!("{}{}", prefix, name)
-    }
+    // fn construct_name(prefix: &str, name: &str) -> String {
+    //     format!("{}{}", prefix, name)
+    // }
 }
 
 /// Environment variable type enum.
@@ -200,4 +167,8 @@ pub enum EnvVarType {
     U16,
     Enum(&'static [&'static str]),
     FilePath,
+}
+
+fn construct_name(prefix: &str, name: &str) -> String {
+    format!("{}{}", prefix, name)
 }

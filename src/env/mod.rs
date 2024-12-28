@@ -1,22 +1,17 @@
 //! This module handles environment realted tasks.
 //!
-//! It contains its own "constants" submodule where all
-//! the environment constants are stored like "PREFIX"
-//! and "VARS". It also contains a "load" function
-//! that loads environment variables from a file and
-//! validates them against specified environment variables.
+//! The module contains two submodules: // todo
 
 // References to submodules
 pub mod constants;
 pub mod validator;
 
 // Importing external crates
-use std::{collections::HashMap, error};
+use std::{collections::HashSet, error, hash::Hash};
 
 // Importing local modules
 use crate::err::{AppError, ErrorKind};
-use constants::{EnvVar, EnvVarType};
-use validator::validate;
+use validator::{validate, EnvVar};
 
 /// Handles load and validation of application environment.
 ///
@@ -28,65 +23,39 @@ use validator::validate;
 ///
 /// # Examples
 /// ```
-/// use axum_auth::env::{EnvVar, EnvVarType, load};
-/// use tempfile::NamedTempFile;
-/// use std::io::Write;
-/// use std::collections::HashMap;
-///
-/// // Create a temp file
-/// let mut temp_file: NamedTempFile = NamedTempFile::new().expect("Failed to create temp file");
-///
-/// // Write some environment variables to the file
-/// let content: &str = "APP_TEST_VAR=example_value\nAPP_ANOTHER_VAR=42";
-/// temp_file.write_all(content.as_bytes()).expect("Failed to write to temp file");
-///
-/// // Get the file path
-/// let file_path: &str = temp_file.path().to_str().expect("Failed to get file path");
-///
-/// let var_prefix: &str = "APP_";
-///
-/// // Define required environment variables
-/// const REQUIRED_VARS: [EnvVar; 1] = [
-///    EnvVar { name: "TEST_VAR", val_type: EnvVarType::String },
-///    ];
-///
-/// // Load and validate environment variables
-/// let result = load(file_path, var_prefix, &REQUIRED_VARS);
-///
-/// eprintln!("{:?}", result);
-///
-/// let expected: HashMap<&str, String> = HashMap::from([("TEST_VAR", "example_value".to_string())]);
-///
-/// assert_eq!(result.unwrap(), expected);
+/// // todo
 /// ```
 ///
 /// # Parameters
-/// - `file_path`: Path to environment file to load.
-/// - `var_prefix`: Prefix for environment variables.
-/// - `required_vars`: Array of environment vriable names
-/// to compare against loaded environment.
+/// - `file_path`: Path to file to load
+///   the environment variables from.
+/// - `var_prefix`: Prefix for environment variables to
+///   use.
+/// - `vars_to_validate`: Variables to validate against
+///   process environment variables.
 ///
 /// # Returns
-/// + `Result<HashMap<&str, String>, AppError>`
-///     - `HashMap<&str, String>`: HashMap of application
-/// environment variables <key, value>.
+/// + `Result<(), AppError>`
+///     - `()`: If environment variables are loaded and
+/// validated successfully.
 ///     - `AppError`: Error type that contains error kind,
 /// message and source.
-pub fn load(file_path: &str, var_prefix: &str) -> Result<(), AppError> {
+pub fn load<V>(
+    file_path: &str,
+    var_prefix: &str,
+    vars_to_validate: HashSet<V>,
+) -> Result<(), AppError>
+where
+    V: EnvVar,
+    V::VarType: Eq + Hash,
+{
     // Load environment file contents into std::env
     load_file(file_path)?;
 
-    // Collect loaded environment variables into a HashMap
-    let loaded_vars: HashMap<String, String> = std::env::vars().collect();
-
-    // Get all required environment variables as a HashSet
-    let required_vars = EnvVar::all();
-
     // Validate loaded environment variables against
-    // required variables with the specified prefix
-    validate(var_prefix, required_vars, loaded_vars)?;
+    // specified environment variables
+    validate(var_prefix, vars_to_validate)?;
 
-    // Ok(app_vars)
     Ok(())
 }
 
