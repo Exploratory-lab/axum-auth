@@ -5,13 +5,15 @@
 // References to submodules
 pub mod constants;
 pub mod validator;
+pub mod vars;
 
 // Importing external crates
 use std::{collections::HashSet, error, hash::Hash};
 
 // Importing local modules
-use crate::err::{AppError, ErrorKind};
-use validator::{validate, EnvVar};
+use crate::core::err::{AppError, ErrorKind};
+use validator::validate;
+use vars::EnvVar;
 
 /// Handles load and validation of application environment.
 ///

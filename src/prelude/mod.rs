@@ -8,7 +8,7 @@
 
 use std::error;
 
-use crate::err::{AppError, ErrorKind};
+use crate::core::err::{AppError, ErrorKind};
 
 /// Function to parse a string into a u16.
 ///

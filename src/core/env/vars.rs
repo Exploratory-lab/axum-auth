@@ -1,14 +1,14 @@
-//! Constants for application environment setup.
-
-// External crate imports
+use once_cell::sync::Lazy;
 use std::{collections::HashSet, error};
-
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 // Local imports
 use crate::{
-    err::{AppError, ErrorKind},
+    core::{
+        config::APP_CONFIG,
+        err::{AppError, ErrorKind},
+    },
     prelude::is_u16,
     strings::{
         env::vars::{
@@ -20,13 +20,7 @@ use crate::{
     },
 };
 
-use super::validator::EnvVar;
-
-// * Environment file path to load
-pub const FILE_PATH: &str = ".env";
-
-// * Prefix for environment variables
-pub const PREFIX: &str = "AXA_";
+static APP_PREFIX: Lazy<&str> = Lazy::new(|| APP_CONFIG.app.prefix.as_str());
 
 // * Environment variables to validate
 // * keep it up to date with the .env.example,
@@ -35,7 +29,6 @@ pub const PREFIX: &str = "AXA_";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
 pub enum RequiredEnvVar {
     // Test, // !! delete
-    AppMode,
     DbName,
     DbHost,
     DbPort,
@@ -54,15 +47,14 @@ impl EnvVar for RequiredEnvVar {
 
     fn name(&self) -> String {
         match self {
-            // Self::Test => Self::construct_name(PREFIX, "TEST"), // !! delete
-            Self::AppMode => construct_name(PREFIX, "APP_MODE"),
-            Self::DbName => construct_name(PREFIX, DB_NAME),
-            Self::DbHost => construct_name(PREFIX, DB_HOST),
-            Self::DbPort => construct_name(PREFIX, DB_PORT),
-            Self::DbUser => construct_name(PREFIX, DB_USER),
-            Self::DbPass => construct_name(PREFIX, DB_PASS),
-            Self::DbSslMode => construct_name(PREFIX, DB_SSL_MODE),
-            Self::PathToDbSslRootCert => construct_name(PREFIX, PATH_TO_DB_SSL_ROOT_CERT),
+            // Self::Test => construct_name(*APP_PREFIX, "TEST"), // !! delete
+            Self::DbName => construct_name(*APP_PREFIX, DB_NAME),
+            Self::DbHost => construct_name(*APP_PREFIX, DB_HOST),
+            Self::DbPort => construct_name(*APP_PREFIX, DB_PORT),
+            Self::DbUser => construct_name(*APP_PREFIX, DB_USER),
+            Self::DbPass => construct_name(*APP_PREFIX, DB_PASS),
+            Self::DbSslMode => construct_name(*APP_PREFIX, DB_SSL_MODE),
+            Self::PathToDbSslRootCert => construct_name(*APP_PREFIX, PATH_TO_DB_SSL_ROOT_CERT),
         }
     }
 
@@ -73,7 +65,6 @@ impl EnvVar for RequiredEnvVar {
     fn type_(&self) -> EnvVarType {
         match self {
             // Self::Test => EnvVarType::String, // !! delete
-            Self::AppMode => EnvVarType::Enum(&["dev", "prod"]),
             Self::DbName => EnvVarType::String,
             Self::DbHost => EnvVarType::String,
             Self::DbPort => EnvVarType::U16,
@@ -139,10 +130,6 @@ impl EnvVar for RequiredEnvVar {
 
         Ok(())
     }
-
-    // fn construct_name(prefix: &str, name: &str) -> String {
-    //     format!("{}{}", prefix, name)
-    // }
 }
 
 /// Environment variable type enum.
@@ -167,6 +154,24 @@ pub enum EnvVarType {
     U16,
     Enum(&'static [&'static str]),
     FilePath,
+}
+
+pub trait EnvVar {
+    type VarType; // Associated type for the type implementing the trait
+
+    fn all() -> HashSet<Self::VarType>
+    where
+        Self: Sized;
+
+    fn name(&self) -> String;
+
+    fn value(&self) -> String;
+
+    fn type_(&self) -> EnvVarType;
+
+    fn verify(&self) -> Result<(), AppError>;
+
+    fn verify_all() -> Result<(), AppError>;
 }
 
 fn construct_name(prefix: &str, name: &str) -> String {

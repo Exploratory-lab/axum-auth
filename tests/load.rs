@@ -4,10 +4,10 @@ use serial_test::serial;
 use std::{collections::HashMap, env, io::Write};
 use tempfile::NamedTempFile;
 
-use axum_auth::{
-    env::load,
-    err::{AppError, ErrorKind},
-};
+// use axum_auth::{
+//     env::load,
+//     err::{AppError, ErrorKind},
+// };
 
 // * Prefix for environment variables
 const PREFIX: &str = "TEST_";

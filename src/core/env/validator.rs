@@ -6,26 +6,8 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 // Importing local modules
-use super::constants::EnvVarType;
-use crate::err::{AppError, ErrorKind};
-
-pub trait EnvVar {
-    type VarType; // Associated type for the type implementing the trait
-
-    fn all() -> HashSet<Self::VarType>
-    where
-        Self: Sized;
-
-    fn name(&self) -> String;
-
-    fn value(&self) -> String;
-
-    fn type_(&self) -> EnvVarType;
-
-    fn verify(&self) -> Result<(), AppError>;
-
-    fn verify_all() -> Result<(), AppError>;
-}
+use super::vars::EnvVar;
+use crate::core::err::{AppError, ErrorKind};
 
 /// ## Validates loaded environment variables.
 ///
@@ -240,8 +222,8 @@ fn collect_app_vars(var_prefix: &str) -> HashMap<String, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::error;
+    // use super::*;
+    // use std::error;
 
     const PREFIX: &str = "APP_";
 
