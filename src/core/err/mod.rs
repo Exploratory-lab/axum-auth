@@ -157,8 +157,17 @@ impl error::Error for AppError {}
 /// - `Parse`: Error parsing data.
 #[derive(Debug, PartialEq)]
 pub enum ErrorKind {
+    // General error kind for environment setup.
     Env,
+
+    // Error kind for parsing data.
     Parse,
+
+    // Error kind for invalid configuration.
+    InvalidConfig,
+
+    // Error kind when failed to set configuration file path.
+    ConfigFilePath,
 }
 
 #[cfg(test)]

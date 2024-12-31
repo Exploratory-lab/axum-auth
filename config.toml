@@ -1,4 +1,4 @@
 [app]
-env = "dev"
-prefix = "AXA_"
-env_file_path = ".env"
+env = "dev"                    # dev, prod
+prefix = "AXA_"                # prefix for env variables
+env_file_path = ".env"        # path to env file

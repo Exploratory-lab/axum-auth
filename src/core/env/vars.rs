@@ -20,7 +20,14 @@ use crate::{
     },
 };
 
-static APP_PREFIX: Lazy<&str> = Lazy::new(|| APP_CONFIG.app.prefix.as_str());
+static APP_PREFIX: Lazy<&str> = Lazy::new(|| {
+    APP_CONFIG
+        .as_ref()
+        .expect("Failed get app configuration")
+        .app
+        .prefix
+        .as_str()
+});
 
 // * Environment variables to validate
 // * keep it up to date with the .env.example,
