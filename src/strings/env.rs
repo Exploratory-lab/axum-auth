@@ -1,5 +1,3 @@
-pub mod msgs {}
-
 pub mod vars {
     //! Constants for environment variables,
     //! their names and example values.

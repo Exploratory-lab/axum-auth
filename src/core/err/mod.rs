@@ -168,6 +168,9 @@ pub enum ErrorKind {
 
     // Error kind when failed to set configuration file path.
     ConfigFilePath,
+
+    // Error kind for invalid value type
+    InvalidValueType,
 }
 
 #[cfg(test)]

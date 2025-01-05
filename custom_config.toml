@@ -1,0 +1,4 @@
+[app]
+env = "prod"                    # dev, prod
+prefix = "ANOTHER_PREFIX_"      # prefix for env variables
+env_file_path = ".env"          # path to env file

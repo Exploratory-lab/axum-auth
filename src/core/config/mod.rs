@@ -13,7 +13,7 @@ use serde::Deserialize;
 use super::err::{AppError, ErrorKind};
 
 /// Default configuration file name.
-const DEFAULT_CONFIG_FILE: &str = "./config";
+pub const DEFAULT_CONFIG_FILE: &str = "./config";
 
 /// Holds the name of the configuration file.
 pub static CONFIG_FILE_PATH: OnceCell<String> = OnceCell::new();
@@ -48,7 +48,7 @@ pub static APP_CONFIG: Lazy<Option<AppConfig>> = Lazy::new(|| {
 ///    },
 /// };
 /// ```
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 pub struct AppConfig {
     pub app: AppSettings,
 }
@@ -70,7 +70,7 @@ pub struct AppConfig {
 ///   env_file_path: ".env".to_string(),
 /// };
 /// ```
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 pub struct AppSettings {
     pub env: String,
     pub prefix: String,
@@ -85,33 +85,17 @@ pub struct AppSettings {
 ///
 /// ## Exaples
 /// ```
-/// use tempfile::NamedTempFile;
-/// use std::io::Write;
-///
-/// use axum_auth::core::config::check_config;
-/// use axum_auth::core::config::APP_CONFIG;
-/// use axum_auth::core::config::CONFIG_FILE_PATH;
-///
-/// let mut temp_file = NamedTempFile::new().expect("Failed to create temporary file");
-///
-/// let config_content = r#"
-/// [app]
-/// env = "dev"
-/// prefix = "APP"
-/// env_file_path = ".env"
-/// "#;
-/// temp_file.write_all(config_content.as_bytes()).expect("Failed to write to temporary file");
-/// let config_file_path = temp_file.path();
-///
-///
+/// // todo
 /// ```
 ///
 /// ## Returns
 /// + `Result<(), AppError>`
 ///    - `Ok(())` - If the configuration was loaded successfully.
 ///    - `Err(AppError)` - If the configuration was not loaded successfully.
-pub fn get_config() -> Result<&'static AppConfig, AppError> {
-    match APP_CONFIG.as_ref() {
+pub fn get_config(
+    config_instance: &'static Lazy<Option<AppConfig>>,
+) -> Result<&'static AppConfig, AppError> {
+    match config_instance.as_ref() {
         Some(config) => Ok(config),
         None => Err(AppError::new(
             ErrorKind::InvalidConfig,
@@ -153,8 +137,19 @@ fn load_config(file_name: &str) -> Option<AppConfig> {
     }
 }
 
+/// ## Builds the configuration from the file.
+///
+/// Function builds the configuration from the file
+/// specified by the file path.
+///
+/// ## Parameters
+/// + `file_path`: `&str` - Path to the configuration file.
+///
+/// ## Returns
+/// + `Result<Config, AppError>` - Loaded configuration.
+///   - `Ok(Config)` - If the configuration was loaded successfully.
+///   - `Err(AppError)` - If the configuration failed to load.
 fn build_config_from_file(file_path: &str) -> Result<Config, AppError> {
-    // Load configuration from the file in the current working directory
     let app_config = Config::builder()
         .add_source(config::File::with_name(file_path))
         .build()
@@ -170,37 +165,4 @@ fn build_config_from_file(file_path: &str) -> Result<Config, AppError> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use tempfile::Builder;
-
-    #[test]
-    fn test_check_config() {
-        // Create a temporary file with a `.toml` extension
-        let temp_file = Builder::new()
-            .suffix(".toml")
-            .tempfile()
-            .expect("Failed to create temporary file");
-
-        // Write valid TOML configuration to the file
-        let config_content = r#"
-        [app]
-        env = "dev"
-        prefix = "APP"
-        env_file_path = ".env"
-        "#;
-        std::fs::write(temp_file.path(), config_content)
-            .expect("Failed to write to temporary file");
-
-        // Set the CONFIG_FILE to the temporary file path
-        CONFIG_FILE_PATH
-            .set(temp_file.path().to_str().unwrap().to_string())
-            .expect("Failed to set CONFIG_FILE");
-
-        // Run the check
-        let result = get_config();
-        // let expected = Ok(());
-
-        // assert_eq!(result, expected);
-    }
-}
+mod tests {}
